@@ -4,4 +4,4 @@ project(gl)
 
 add_executable(triangle main.cpp)
 
-target_link_libraries(triangle glfw GL)
+target_link_libraries(triangle glfw GL GLEW)
