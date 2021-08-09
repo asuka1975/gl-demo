@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - OpenGL >= 3.0
 - GLFW-b >= 3.3
+- mtl
 
 library:
   source-dirs: src
