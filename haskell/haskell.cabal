@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 29facebb5ec397165a3048786ae268e93ff6e9c7f0c02c29b046b94e2812d7b6
+-- hash: 56a3236bf3e681579819135149b38ae679f86f20ad81346be581374b7fec2dcb
 
 name:           haskell
 version:        0.1.0.0
@@ -28,6 +28,7 @@ source-repository head
 library
   exposed-modules:
       Lib
+      Shader
   other-modules:
       Paths_haskell
   hs-source-dirs:
@@ -36,6 +37,7 @@ library
       GLFW-b >=3.3
     , OpenGL >=3.0
     , base >=4.7 && <5
+    , bytestring
     , mtl
   default-language: Haskell2010
 
@@ -50,6 +52,7 @@ executable haskell-exe
       GLFW-b >=3.3
     , OpenGL >=3.0
     , base >=4.7 && <5
+    , bytestring
     , haskell
     , mtl
   default-language: Haskell2010
@@ -66,6 +69,7 @@ test-suite haskell-test
       GLFW-b >=3.3
     , OpenGL >=3.0
     , base >=4.7 && <5
+    , bytestring
     , haskell
     , mtl
   default-language: Haskell2010

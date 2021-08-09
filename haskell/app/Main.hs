@@ -5,12 +5,14 @@ import Control.Monad.Reader  (ReaderT, runReaderT, ask, asks)
 import Control.Monad.State   (liftIO)
 import Foreign.Marshal.Array (withArray)
 import Foreign.Ptr           (plusPtr, nullPtr, Ptr)
+import qualified Data.ByteString as B
 
 import qualified Graphics.Rendering.OpenGL as GL
 import Graphics.Rendering.OpenGL (($=))
 import qualified Graphics.UI.GLFW          as GLFW
 
 import Lib
+import Shader
 
 data GLHandle = GLHandle
     { window  :: !GLFW.Window
@@ -36,9 +38,19 @@ loopEnv f handle = do
 
 loop :: Env ()
 loop = do
-    window <- asks window
+    window  <- asks window
+    vao     <- asks vao
+    program <- asks program
 
     liftIO $ do
+        GL.clear [GL.ColorBuffer]
+
+        GL.bindVertexArrayObject $= Just vao
+        GL.currentProgram        $= Just program
+        GL.drawArrays GL.Triangles 0 3
+        GL.currentProgram        $= Nothing
+        GL.bindVertexArrayObject $= Nothing
+
         GLFW.swapBuffers window
         GLFW.waitEvents
 
@@ -52,6 +64,8 @@ main = do
         m <- GLFW.createWindow 700 700 "triangle" Nothing Nothing
         case m of 
             (Just window) -> do
+                GLFW.windowHint $ GLFW.WindowHint'ContextVersionMajor 4
+                GLFW.windowHint $ GLFW.WindowHint'ContextVersionMinor 6
                 GLFW.makeContextCurrent m 
                 --         | position |    |   color   |
                 let vertex = [  0,  1,      1, 0, 0, 1
@@ -71,10 +85,14 @@ main = do
                 GL.vertexAttribArray   verLoc $= GL.Enabled
                 GL.vertexAttribArray   colLoc $= GL.Enabled
                 GL.vertexAttribPointer verLoc $= (GL.ToFloat, GL.VertexArrayDescriptor 2 GL.Float (4 * 6) (offset 0))
-                GL.vertexAttribPointer colLoc $= (GL.ToFloat, GL.VertexArrayDescriptor 2 GL.Float (4 * 6) (offset 8))
+                GL.vertexAttribPointer colLoc $= (GL.ToFloat, GL.VertexArrayDescriptor 4 GL.Float (4 * 6) (offset 8))
                 GL.bindVertexArrayObject $= Nothing
 
                 program <- GL.createProgram
+                B.readFile "../shaders/triangle.vert" >>= attach program GL.VertexShader
+                B.readFile "../shaders/triangle.frag" >>= attach program GL.FragmentShader
+                GL.linkProgram program
+
                 let handle = GLHandle { window  = window
                                       , vtx     = vbo
                                       , vao     = vao

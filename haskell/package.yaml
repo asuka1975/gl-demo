@@ -24,6 +24,7 @@ dependencies:
 - OpenGL >= 3.0
 - GLFW-b >= 3.3
 - mtl
+- bytestring
 
 library:
   source-dirs: src
