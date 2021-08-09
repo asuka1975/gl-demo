@@ -1,5 +1,6 @@
 from ctypes import Structure, sizeof
 import sys
+import atexit
 
 from OpenGL.GL import *
 import glfw
@@ -38,3 +39,29 @@ class Shader:
 
     def unuse(self):
         glUseProgram(0)
+
+def main():
+    if not glfw.init():
+        raise RuntimeError("failed to initialize GLFW")
+    atexit.register(glfw.terminate)
+
+    window = glfw.create_window(700, 700, "triangle", None, None)
+    if not window:
+        raise RuntimeError("failed to create GLFWwindow")
+
+    glfw.window_hint(glfw.CONTEXT_VERSION_MAJOR, 4)
+    glfw.window_hint(glfw.CONTEXT_VERSION_MINOR, 6)
+    glfw.make_context_current(window)
+
+
+
+    glClearColor(0, 0, 0, 1)
+    while glfw.window_should_close(window) == glfw.FALSE:
+        glClear(GL_COLOR_BUFFER_BIT)
+
+
+        glfw.swap_buffers(window)
+        glfw.wait_events()
+
+if __name__ == "__main__":
+    main()
