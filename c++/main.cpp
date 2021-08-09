@@ -1,7 +1,10 @@
+#include <fstream>
 #include <iostream>
+#include <vector>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 
 class shader_program {
 public:
@@ -77,6 +80,11 @@ private:
     GLuint m_handle;
 };
 
+struct vertex_t {
+    glm::vec2 position;
+    glm::vec4 color;
+};
+
 int main() {
     if(glfwInit() == GLFW_FALSE) {
         throw std::runtime_error("failed to initialize GLFW");
@@ -96,17 +104,51 @@ int main() {
         throw std::runtime_error("failed to initialize GLEW");
     }
 
-    
+    std::vector<vertex_t> vertex {
+        { { 0, 1 }, { 1, 0, 0, 1 } },
+        { { -1, -1 }, { 0, 1, 0, 1 } },
+        { { 1, -1 }, { 0, 0, 1, 1 } }
+    };
+
+    GLuint vtx;
+    glGenBuffers(1, &vtx);
+    glBindBuffer(GL_ARRAY_BUFFER, vtx);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_t) * vertex.size(), vertex.data(), GL_STATIC_DRAW);
+
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    glBindBuffer(GL_ARRAY_BUFFER, vtx);
+    glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (GLvoid*)(offsetof(vertex_t, position)));
+    glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(vertex_t), (GLvoid*)(offsetof(vertex_t, color)));
+    glBindVertexArray(0);
+
+    shader_program program;
+    if(std::fstream fin("../shaders/triangle.vert", std::ios::in); fin.good()) {
+        program.add_shader(std::string { std::istreambuf_iterator<char>{fin}, std::istreambuf_iterator<char>{} }, GL_VERTEX_SHADER);
+    }
+    if(std::fstream fin("../shaders/triangle.frag", std::ios::in); fin.good()) {
+        program.add_shader(std::string { std::istreambuf_iterator<char>{fin}, std::istreambuf_iterator<char>{} }, GL_FRAGMENT_SHADER);
+    }
+    program.link();
 
     glClearColor(0, 0, 0, 1);
     while(glfwWindowShouldClose(window) == GLFW_FALSE) {
         glClear(GL_COLOR_BUFFER_BIT);
 
+        program.use();
+        glBindVertexArray(vao);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glBindVertexArray(0);
+        program.unuse();
 
         glfwSwapBuffers(window);
         glfwWaitEvents();
     }
-
+    glDeleteVertexArrays(1, &vao);
+    glDeleteBuffers(1, &vtx);
 
     return 0;
 }
