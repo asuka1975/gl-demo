@@ -78,5 +78,35 @@ class shader_program {
     };
 
 int main() {
+    if(glfwInit() == GLFW_FALSE) {
+        throw std::runtime_error("failed to initialize GLFW");
+    }
+    std::atexit(glfwTerminate);
+
+    auto window = glfwCreateWindow(700, 700, "triangle", nullptr, nullptr);
+    if(window == nullptr) {
+        throw std::runtime_error("failed to create GLFWwindow");
+    }
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwMakeContextCurrent(window);
+
+    if(glewInit() != GLEW_OK) {
+        throw std::runtime_error("failed to initialize GLEW");
+    }
+
+    
+
+    glClearColor(0, 0, 0, 1);
+    while(glfwWindowShouldClose(window) == GLFW_FALSE) {
+        glClear(GL_COLOR_BUFFER_BIT);
+
+
+        glfwSwapBuffers(window);
+        glfwWaitEvents();
+    }
+
+
     return 0;
 }
